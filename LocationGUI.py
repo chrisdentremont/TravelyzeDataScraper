@@ -7,7 +7,7 @@ import openai
 import threading
 from threading import Event
 
-openai.api_key = "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"
+openai.api_key = ""
 
 cancelEvent = Event()
 

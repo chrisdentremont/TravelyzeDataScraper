@@ -42,7 +42,7 @@ def generateSummaries():
         ])
     
     # Add the resulting text to the output string to display in the output text area
-    summaryGroup += f"Before GPT =======================================================\n\n {pTexts[1].text} \n\n After GPT =======================================================\n\n {completion.choices[0].message.content} \n\n"
+    summaryGroup += f"Before OpenAI =======================================================\n\n {pTexts[1].text} \n\n After OpenAI =======================================================\n\n {completion.choices[0].message.content} \n\n"
     
     # count = 0
 
@@ -66,20 +66,27 @@ def generateSummaries():
     #     # if count > 10: break 
     
     # Display the final output and clear the progress bar/label
+    outputSummary.configure(state="normal")
     outputSummary.insert(tk.END, summaryGroup)
+    outputSummary.configure(state="disabled")
     progressBar.stop()
     progressLabel['text'] = ""
     progressBar.pack_forget()
 
+
+def sendToDatabase():
+    #Implement sending data to database
+    global progressLabel
+
 # Main window widget
 window = tk.Tk()
 window.title("Travelyze Data Entry Tool")
-window.geometry("800x600")
+window.geometry("800x700")
 
 # Widgets to display text box to enter webpage URL
 URLframe = tk.Frame(master=window)
 URLframe.pack()
-URLlabel = tk.Label(master=URLframe, text="Enter Wikipedia URL:", font=("Arial", 16))
+URLlabel = tk.Label(master=URLframe, text="Enter URL:", font=("Arial", 16))
 URLlabel.pack(pady=(30, 0))
 URLentry = tk.Entry(master=URLframe, width="300")
 URLentry.pack(padx=50, pady=(0, 10))
@@ -96,7 +103,13 @@ progressBar = ttk.Progressbar(progressFrame, mode='indeterminate', length=280)
 # Widgets to display text area to show output of web scraping
 outputFrame = tk.Frame(master=window)
 outputFrame.pack()
-outputSummary = tk.Text(master=outputFrame, font="Arial", height=500)
-outputSummary.pack(fill=tk.X, padx=30, pady=30)
+outputSummary = tk.Text(master=outputFrame, font="Arial", height=20)
+outputSummary.configure(state="disabled")
+outputSummary.pack(pady=(30, 0), padx=30)
+
+bottomFrame = tk.Frame(master=window)
+bottomFrame.pack(side=tk.RIGHT)
+submitData = tk.Button(master=bottomFrame, text="Send to Database", font=("Arial", 12), command=sendToDatabase)
+submitData.pack(pady=30, padx=30)
 
 window.mainloop()

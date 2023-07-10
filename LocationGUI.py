@@ -5,7 +5,7 @@ import threading
 import json
 import time
 
-openai.api_key = "" 
+openai.api_key = "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" 
 
 # The overall dictionary that will contain all information about a country
 dataToSubmit = {}
@@ -18,11 +18,26 @@ def getCountryData(country, url):
     countryData = {}
 
     # Check if a specific section exists, and pull the data if it does
-    if soup.find(id="Cuisine"):
+    # Current categories:
+    #   - Cuisine
+    #   - Transportation/Transport
+    #   - Education
+    #   - Sports
+    #   - Music
+    #   - Climate
+    #
+    if soup.find(id="Cuisine") or soup.find(id="Restaurants_and_cuisine"):
         cuisine_text = ""
-        cuisine = soup.find(id="Cuisine").parent
+
+        # Get the right cuisine tag
+        cuisine = None
+        if soup.find(id="Cuisine"):
+            cuisine = soup.find(id="Cuisine").parent
+        elif soup.find(id="Restaurants_and_cuisine"):
+            cuisine = soup.find(id="Restaurants_and_cuisine").parent
+        
         for tag in cuisine.next_siblings:
-            if tag.name == 'h3':
+            if tag.name == 'h2' or tag.name == 'h3':
                 break
             elif tag.name == 'p':
                 cuisine_text += tag.text + "\n"
@@ -38,11 +53,18 @@ def getCountryData(country, url):
             except:
                 time.sleep(70)
 
-    if soup.find(id="Transportation"):
+    if soup.find(id="Transportation") or soup.find(id="Transport"):
         transportation_text = ""
-        transportation = soup.find(id="Transportation").parent
+
+        # Get the right transporation tag
+        transportation = None
+        if soup.find(id="Transportation"):
+            transportation = soup.find(id="Transportation").parent
+        elif soup.find(id="Transport"):
+            transportation = soup.find(id="Transport").parent
+        
         for tag in transportation.next_siblings:
-            if tag.name == 'h3':
+            if tag.name == 'h2' or tag.name == 'h3':
                 break
             elif tag.name == 'p':
                 transportation_text += tag.text + "\n"
@@ -62,7 +84,7 @@ def getCountryData(country, url):
         education_text = ""
         education = soup.find(id="Education").parent
         for tag in education.next_siblings:
-            if tag.name == 'h3':
+            if tag.name == 'h2' or tag.name == 'h3':
                 break
             elif tag.name == 'p':
                 education_text += tag.text + "\n"
@@ -78,11 +100,20 @@ def getCountryData(country, url):
             except:
                 time.sleep(70)
 
-    if soup.find(id="Sports"):
+    if soup.find(id="Sports") or soup.find(id="Sports_and_recreation") or soup.find(id="Sport_and_recreation"):
         sports_text = ""
-        sports = soup.find(id="Sports").parent
+
+        # Get the right sports tag
+        sports = None
+        if soup.find(id="Sports"):
+            sports = soup.find(id="Sports").parent
+        elif soup.find(id="Sports_and_recreation"):
+            sports = soup.find(id="Sports_and_recreation").parent
+        elif soup.find(id="Sport_and_recreation"):
+            sports = soup.find(id="Sport_and_recreation").parent
+        
         for tag in sports.next_siblings:
-            if tag.name == 'h3':
+            if tag.name == 'h2' or tag.name == 'h3':
                 break
             elif tag.name == 'p':
                 sports_text += tag.text + "\n"
@@ -94,6 +125,46 @@ def getCountryData(country, url):
                 {"role": "system", "content" : "Make a short summary of this text: " + sports_text}
                 ])
                 countryData['Sports'] = completion.choices[0].message.content
+                prompt_complete = True
+            except:
+                time.sleep(70)
+
+    if soup.find(id="Music"):
+        music_text = ""
+        music = soup.find(id="Music").parent
+        for tag in music.next_siblings:
+            if tag.name == 'h2' or tag.name == 'h3':
+                break
+            elif tag.name == 'p':
+                music_text += tag.text + "\n"
+
+        prompt_complete = False
+        while not prompt_complete:
+            try:
+                completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages = [
+                {"role": "system", "content" : "Make a short summary of this text: " + music_text}
+                ])
+                countryData['Music'] = completion.choices[0].message.content
+                prompt_complete = True
+            except:
+                time.sleep(70)
+
+    if soup.find(id="Climate"):
+        climate_text = ""
+        climate = soup.find(id="Climate").parent
+        for tag in climate.next_siblings:
+            if tag.name == 'h2' or tag.name == 'h3':
+                break
+            elif tag.name == 'p':
+                climate_text += tag.text + "\n"
+
+        prompt_complete = False
+        while not prompt_complete:
+            try:
+                completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages = [
+                {"role": "system", "content" : "Make a short summary of this text: " + climate_text}
+                ])
+                countryData['Climate'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
                 time.sleep(70)
@@ -135,22 +206,5 @@ def generateSummaries():
     
     with open("output.json", "w") as outfile:
         json.dump(dataToSubmit, outfile)
-
-    # In their own threads, parse each URL and store data in their own dictionary
-        # Dictionary has key of randomly generated ID, value is another dictionary with key as category + value is text
-        #
-        # - If the article doesn't have a category, use "N/A" 
-        #
-        # Categories: 
-        # - Country Name
-        # - Food & Restaurants
-        # - Transportation
-        # - Tourism/Landmarks
-
-    # Sample Request
-    #
-    # completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages = [
-    #     {"role": "system", "content" : "Make a short summary of this text: " + pTexts[1].text}
-    #     ])
 
 generateSummaries()

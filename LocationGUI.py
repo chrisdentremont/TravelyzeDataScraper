@@ -5,7 +5,7 @@ import threading
 import json
 import time
 
-openai.api_key = "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" 
+openai.api_key = "" 
 
 # The overall dictionary that will contain all information about a country
 dataToSubmit = {}

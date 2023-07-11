@@ -11,7 +11,8 @@ openai.api_key = ""
 # The overall dictionary that will contain all information about a country
 dataToSubmit = {}
 
-cred = credentials.Certificate("C:\\Users\\chris\\Downloads\\travelyze-36f87-firebase-adminsdk-c06ih-ab6b12d6e9.json")
+keyPath = "" # Private key local file path
+cred = credentials.Certificate(keyPath)
 app = firebase_admin.initialize_app(cred)
 firestore_client = firestore.client()
 

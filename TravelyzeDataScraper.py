@@ -32,6 +32,9 @@ def getCountryData(country, url):
     #   - Climate
     #
     if soup.find(id="Cuisine") or soup.find(id="Restaurants_and_cuisine"):
+        cuisine_data = {
+            'images': [],
+        }
         cuisine_text = ""
 
         # Get the right cuisine tag
@@ -46,6 +49,9 @@ def getCountryData(country, url):
                 break
             elif tag.name == 'p':
                 cuisine_text += tag.text + "\n"
+            elif tag.name == 'figure':
+                # Get and store images/captions
+                continue
 
         prompt_complete = False
         while not prompt_complete:
@@ -53,12 +59,17 @@ def getCountryData(country, url):
                 completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages = [
                 {"role": "system", "content" : "Make a short summary of this text: " + cuisine_text}
                 ])
-                countryData['Cuisine'] = completion.choices[0].message.content
+                cuisine_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
                 time.sleep(70)
 
+        countryData['Cuisine'] = cuisine_data
+
     if soup.find(id="Transportation") or soup.find(id="Transport"):
+        transportation_data = {
+            'images': [],
+        }
         transportation_text = ""
 
         # Get the right transporation tag
@@ -73,6 +84,9 @@ def getCountryData(country, url):
                 break
             elif tag.name == 'p':
                 transportation_text += tag.text + "\n"
+            elif tag.name == 'figure':
+                # Get and store images/captions
+                continue
 
         prompt_complete = False
         while not prompt_complete:
@@ -80,19 +94,28 @@ def getCountryData(country, url):
                 completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages = [
                 {"role": "system", "content" : "Make a short summary of this text: " + transportation_text}
                 ])
-                countryData['Transportation'] = completion.choices[0].message.content
+                transportation_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
                 time.sleep(70)
 
+        countryData['Transportation'] = transportation_data
+
     if soup.find(id="Education"):
+        education_data = {
+            'images': [],
+        }
         education_text = ""
+
         education = soup.find(id="Education").parent
         for tag in education.next_siblings:
             if tag.name == 'h2' or tag.name == 'h3':
                 break
             elif tag.name == 'p':
                 education_text += tag.text + "\n"
+            elif tag.name == 'figure':
+                # Get and store images/captions
+                continue
 
         prompt_complete = False
         while not prompt_complete:
@@ -100,12 +123,17 @@ def getCountryData(country, url):
                 completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages = [
                 {"role": "system", "content" : "Make a short summary of this text: " + education_text}
                 ])
-                countryData['Education'] = completion.choices[0].message.content
+                education_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
                 time.sleep(70)
 
+        countryData['Education'] = education_data
+
     if soup.find(id="Sports") or soup.find(id="Sports_and_recreation") or soup.find(id="Sport_and_recreation"):
+        sports_data = {
+            'images': [],
+        }
         sports_text = ""
 
         # Get the right sports tag
@@ -122,6 +150,9 @@ def getCountryData(country, url):
                 break
             elif tag.name == 'p':
                 sports_text += tag.text + "\n"
+            elif tag.name == 'figure':
+                # Get and store images/captions
+                continue
 
         prompt_complete = False
         while not prompt_complete:
@@ -129,19 +160,28 @@ def getCountryData(country, url):
                 completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages = [
                 {"role": "system", "content" : "Make a short summary of this text: " + sports_text}
                 ])
-                countryData['Sports'] = completion.choices[0].message.content
+                sports_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
                 time.sleep(70)
 
+        countryData['Sports'] = sports_data
+
     if soup.find(id="Music"):
+        music_data = {
+            'images': [],
+        }
         music_text = ""
+
         music = soup.find(id="Music").parent
         for tag in music.next_siblings:
             if tag.name == 'h2' or tag.name == 'h3':
                 break
             elif tag.name == 'p':
                 music_text += tag.text + "\n"
+            elif tag.name == 'figure':
+                # Get and store images/captions
+                continue
 
         prompt_complete = False
         while not prompt_complete:
@@ -149,19 +189,28 @@ def getCountryData(country, url):
                 completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages = [
                 {"role": "system", "content" : "Make a short summary of this text: " + music_text}
                 ])
-                countryData['Music'] = completion.choices[0].message.content
+                music_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
                 time.sleep(70)
 
+        countryData['Music'] = music_data
+
     if soup.find(id="Climate"):
+        climate_data = {
+            'images': [],
+        }
         climate_text = ""
+
         climate = soup.find(id="Climate").parent
         for tag in climate.next_siblings:
             if tag.name == 'h2' or tag.name == 'h3':
                 break
             elif tag.name == 'p':
                 climate_text += tag.text + "\n"
+            elif tag.name == 'figure':
+                # Get and store images/captions
+                continue
 
         prompt_complete = False
         while not prompt_complete:
@@ -169,10 +218,12 @@ def getCountryData(country, url):
                 completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages = [
                 {"role": "system", "content" : "Make a short summary of this text: " + climate_text}
                 ])
-                countryData['Climate'] = completion.choices[0].message.content
+                climate_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
                 time.sleep(70)
+
+        countryData['Climate'] = climate_data
 
     dataToSubmit[country] = countryData
     print(country + " is done")

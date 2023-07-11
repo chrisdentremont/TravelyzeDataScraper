@@ -21,9 +21,19 @@ def getCountryData(country, url):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html.parser")
 
-    countryData = {}
+    countryData = {
+        'Name': country,
+        'Categories': {
+            'Cuisine': {},
+            'Transportation': {},
+            'Education': {},
+            'Sports': {},
+            'Music': {},
+            'Climate': {},
+        },
+    }
 
-    # Check if a specific section exists, and pull the data if it does
+    # Check if a specific category exists, and pull the data if it does
     # Current categories:
     #   - Cuisine
     #   - Transportation/Transport
@@ -65,7 +75,7 @@ def getCountryData(country, url):
             except:
                 time.sleep(70)
 
-        countryData['Cuisine'] = cuisine_data
+        countryData['Categories']['Cuisine'] = cuisine_data
 
     if soup.find(id="Transportation") or soup.find(id="Transport"):
         transportation_data = {
@@ -100,7 +110,7 @@ def getCountryData(country, url):
             except:
                 time.sleep(70)
 
-        countryData['Transportation'] = transportation_data
+        countryData['Categories']['Transportation'] = transportation_data
 
     if soup.find(id="Education"):
         education_data = {
@@ -129,7 +139,7 @@ def getCountryData(country, url):
             except:
                 time.sleep(70)
 
-        countryData['Education'] = education_data
+        countryData['Categories']['Education'] = education_data
 
     if soup.find(id="Sports") or soup.find(id="Sports_and_recreation") or soup.find(id="Sport_and_recreation"):
         sports_data = {
@@ -166,7 +176,7 @@ def getCountryData(country, url):
             except:
                 time.sleep(70)
 
-        countryData['Sports'] = sports_data
+        countryData['Categories']['Sports'] = sports_data
 
     if soup.find(id="Music"):
         music_data = {
@@ -195,7 +205,7 @@ def getCountryData(country, url):
             except:
                 time.sleep(70)
 
-        countryData['Music'] = music_data
+        countryData['Categories']['Music'] = music_data
 
     if soup.find(id="Climate"):
         climate_data = {
@@ -224,7 +234,7 @@ def getCountryData(country, url):
             except:
                 time.sleep(70)
 
-        countryData['Climate'] = climate_data
+        countryData['Categories']['Climate'] = climate_data
 
     dataToSubmit[country] = countryData
     print(country + " is done")

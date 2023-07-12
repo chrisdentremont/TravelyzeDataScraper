@@ -3,6 +3,7 @@ import openai
 import threading
 import time
 import firebase_admin
+import re
 from firebase_admin import firestore, credentials
 from bs4 import BeautifulSoup
 
@@ -44,7 +45,7 @@ def getCountryData(country, url):
     #
     if soup.find(id="Cuisine") or soup.find(id="Restaurants_and_cuisine"):
         cuisine_data = {
-            'images': [],
+            'images': {},
         }
         cuisine_text = ""
 
@@ -61,9 +62,26 @@ def getCountryData(country, url):
             elif tag.name == 'p':
                 cuisine_text += tag.text + "\n"
             elif tag.name == 'figure':
-                # Get and store images/captions
-                continue
+                # Get and store image
+                image_link = tag.find('a')
+                image_page = requests.get('https://en.wikipedia.org' + image_link['href'])
+                image_soup = BeautifulSoup(image_page.content, 'html.parser')
+                image_div = image_soup.find('div', attrs={'class':'fullImageLink'})
+                image_source_url = image_div.find('a')['href']
 
+                # Get and store caption
+                caption_tag = tag.find('figcaption')
+
+                caption_text = caption_tag.text
+                # Remove footnote links in captions (ex. [306])
+                caption_footnotes = re.findall('\[([^]]+)\]', caption_text)
+                for s in caption_footnotes:
+                    caption_text = caption_text.replace('[' + s + ']', '')
+
+
+                cuisine_data['images'][image_source_url] = caption_text
+
+        # Call OpenAI API, wait 30 seconds and try again if requests per minute limit has been reached
         prompt_complete = False
         while not prompt_complete:
             try:
@@ -73,13 +91,13 @@ def getCountryData(country, url):
                 cuisine_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
-                time.sleep(70)
+                time.sleep(30)
 
         countryData['Categories']['Cuisine'] = cuisine_data
 
     if soup.find(id="Transportation") or soup.find(id="Transport"):
         transportation_data = {
-            'images': [],
+            'images': {},
         }
         transportation_text = ""
 
@@ -96,9 +114,25 @@ def getCountryData(country, url):
             elif tag.name == 'p':
                 transportation_text += tag.text + "\n"
             elif tag.name == 'figure':
-                # Get and store images/captions
-                continue
+                # Get and store image
+                image_link = tag.find('a')
+                image_page = requests.get('https://en.wikipedia.org' + image_link['href'])
+                image_soup = BeautifulSoup(image_page.content, 'html.parser')
+                image_div = image_soup.find('div', attrs={'class':'fullImageLink'})
+                image_source_url = image_div.find('a')['href']
 
+                # Get and store caption
+                caption_tag = tag.find('figcaption')
+
+                caption_text = caption_tag.text
+                # Remove footnote links in captions (ex. [306])
+                caption_footnotes = re.findall('\[([^]]+)\]', caption_text)
+                for s in caption_footnotes:
+                    caption_text = caption_text.replace('[' + s + ']', '')
+
+                transportation_data['images'][image_source_url] = caption_text
+
+        # Call OpenAI API, wait 30 seconds and try again if requests per minute limit has been reached
         prompt_complete = False
         while not prompt_complete:
             try:
@@ -108,13 +142,13 @@ def getCountryData(country, url):
                 transportation_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
-                time.sleep(70)
+                time.sleep(30)
 
         countryData['Categories']['Transportation'] = transportation_data
 
     if soup.find(id="Education"):
         education_data = {
-            'images': [],
+            'images': {},
         }
         education_text = ""
 
@@ -125,9 +159,25 @@ def getCountryData(country, url):
             elif tag.name == 'p':
                 education_text += tag.text + "\n"
             elif tag.name == 'figure':
-                # Get and store images/captions
-                continue
+                # Get and store image
+                image_link = tag.find('a')
+                image_page = requests.get('https://en.wikipedia.org' + image_link['href'])
+                image_soup = BeautifulSoup(image_page.content, 'html.parser')
+                image_div = image_soup.find('div', attrs={'class':'fullImageLink'})
+                image_source_url = image_div.find('a')['href']
 
+                # Get and store caption
+                caption_tag = tag.find('figcaption')
+
+                caption_text = caption_tag.text
+                # Remove footnote links in captions (ex. [306])
+                caption_footnotes = re.findall('\[([^]]+)\]', caption_text)
+                for s in caption_footnotes:
+                    caption_text = caption_text.replace('[' + s + ']', '')
+
+                education_data['images'][image_source_url] = caption_text
+
+        # Call OpenAI API, wait 30 seconds and try again if requests per minute limit has been reached
         prompt_complete = False
         while not prompt_complete:
             try:
@@ -137,13 +187,13 @@ def getCountryData(country, url):
                 education_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
-                time.sleep(70)
+                time.sleep(30)
 
         countryData['Categories']['Education'] = education_data
 
     if soup.find(id="Sports") or soup.find(id="Sports_and_recreation") or soup.find(id="Sport_and_recreation"):
         sports_data = {
-            'images': [],
+            'images': {},
         }
         sports_text = ""
 
@@ -162,9 +212,25 @@ def getCountryData(country, url):
             elif tag.name == 'p':
                 sports_text += tag.text + "\n"
             elif tag.name == 'figure':
-                # Get and store images/captions
-                continue
+                # Get and store image
+                image_link = tag.find('a')
+                image_page = requests.get('https://en.wikipedia.org' + image_link['href'])
+                image_soup = BeautifulSoup(image_page.content, 'html.parser')
+                image_div = image_soup.find('div', attrs={'class':'fullImageLink'})
+                image_source_url = image_div.find('a')['href']
 
+                # Get and store caption
+                caption_tag = tag.find('figcaption')
+
+                caption_text = caption_tag.text
+                # Remove footnote links in captions (ex. [306])
+                caption_footnotes = re.findall('\[([^]]+)\]', caption_text)
+                for s in caption_footnotes:
+                    caption_text = caption_text.replace('[' + s + ']', '')
+
+                sports_data['images'][image_source_url] = caption_text
+
+        # Call OpenAI API, wait 30 seconds and try again if requests per minute limit has been reached
         prompt_complete = False
         while not prompt_complete:
             try:
@@ -174,13 +240,13 @@ def getCountryData(country, url):
                 sports_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
-                time.sleep(70)
+                time.sleep(30)
 
         countryData['Categories']['Sports'] = sports_data
 
     if soup.find(id="Music"):
         music_data = {
-            'images': [],
+            'images': {},
         }
         music_text = ""
 
@@ -191,9 +257,25 @@ def getCountryData(country, url):
             elif tag.name == 'p':
                 music_text += tag.text + "\n"
             elif tag.name == 'figure':
-                # Get and store images/captions
-                continue
+                # Get and store image
+                image_link = tag.find('a')
+                image_page = requests.get('https://en.wikipedia.org' + image_link['href'])
+                image_soup = BeautifulSoup(image_page.content, 'html.parser')
+                image_div = image_soup.find('div', attrs={'class':'fullImageLink'})
+                image_source_url = image_div.find('a')['href']
 
+                # Get and store caption
+                caption_tag = tag.find('figcaption')
+
+                caption_text = caption_tag.text
+                # Remove footnote links in captions (ex. [306])
+                caption_footnotes = re.findall('\[([^]]+)\]', caption_text)
+                for s in caption_footnotes:
+                    caption_text = caption_text.replace('[' + s + ']', '')
+
+                music_data['images'][image_source_url] = caption_text
+
+        # Call OpenAI API, wait 30 seconds and try again if requests per minute limit has been reached
         prompt_complete = False
         while not prompt_complete:
             try:
@@ -203,13 +285,13 @@ def getCountryData(country, url):
                 music_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
-                time.sleep(70)
+                time.sleep(30)
 
         countryData['Categories']['Music'] = music_data
 
     if soup.find(id="Climate"):
         climate_data = {
-            'images': [],
+            'images': {},
         }
         climate_text = ""
 
@@ -220,9 +302,25 @@ def getCountryData(country, url):
             elif tag.name == 'p':
                 climate_text += tag.text + "\n"
             elif tag.name == 'figure':
-                # Get and store images/captions
-                continue
+                # Get and store image
+                image_link = tag.find('a')
+                image_page = requests.get('https://en.wikipedia.org' + image_link['href'])
+                image_soup = BeautifulSoup(image_page.content, 'html.parser')
+                image_div = image_soup.find('div', attrs={'class':'fullImageLink'})
+                image_source_url = image_div.find('a')['href']
 
+                # Get and store caption
+                caption_tag = tag.find('figcaption')
+
+                caption_text = caption_tag.text
+                # Remove footnote links in captions (ex. [306])
+                caption_footnotes = re.findall('\[([^]]+)\]', caption_text)
+                for s in caption_footnotes:
+                    caption_text = caption_text.replace('[' + s + ']', '')
+
+                climate_data['images'][image_source_url] = caption_text
+
+        # Call OpenAI API, wait 30 seconds and try again if requests per minute limit has been reached
         prompt_complete = False
         while not prompt_complete:
             try:
@@ -232,19 +330,23 @@ def getCountryData(country, url):
                 climate_data['text'] = completion.choices[0].message.content
                 prompt_complete = True
             except:
-                time.sleep(70)
+                time.sleep(30)
 
         countryData['Categories']['Climate'] = climate_data
 
     dataToSubmit[country] = countryData
     print(country + " is done")
 
-def generateSummaries():
+def uploadCountryData():
     # Retrieve the entered URL, send a GET request to get HTML content and pass it to BeautifulSoup to parse through the HTML
     countryListURL = "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population"
     page = requests.get(countryListURL)
     soup = BeautifulSoup(page.content, "html.parser")
 
+    # Use in thread loop for testing
+    testCountryURL = {
+        'Paris': 'https://en.wikipedia.org/wiki/Paris',
+    }
 
     # Create dictionary with country names linked to their respective Wikipedia URL
     countryURLS = {}
@@ -262,12 +364,14 @@ def generateSummaries():
         current_country_link = current_country.find('a')
         countryURLS[current_country_link.text] = "https://en.wikipedia.org/" + current_country_link['href']
 
+    # Store each country in a separate thread for data collection
     thread_list = []
     for country in countryURLS.keys():
         thread = threading.Thread(target=getCountryData, args=(country, countryURLS[country],))
         thread_list.append(thread)
         thread.start()
 
+    # Wait for every thread to be finished before submitting to Firebase
     for thread in thread_list:
         thread.join()
     
@@ -278,4 +382,4 @@ def generateSummaries():
         print(country + " uploaded")
     
 
-generateSummaries()
+uploadCountryData()

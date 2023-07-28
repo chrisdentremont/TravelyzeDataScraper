@@ -24,6 +24,7 @@ def getCountryData(country, url):
 
     countryData = {
         'Name': country,
+        'Flag': "",
         'Categories': {
             'Cuisine': {},
             'Transportation': {},
@@ -33,6 +34,11 @@ def getCountryData(country, url):
             'Climate': {},
         },
     }
+
+    # Get country's flag image link
+    for t in soup.select('img[alt*="Flag of"]'):
+        countryData['Flag'] = t['src']
+
 
     # Check if a specific category exists, and pull the data if it does
     # Current categories:
@@ -345,7 +351,7 @@ def uploadCountryData():
 
     # Use in thread loop for testing
     testCountryURL = {
-        'Paris': 'https://en.wikipedia.org/wiki/Paris',
+        'France': 'https://en.wikipedia.org/wiki/France',
     }
 
     # Create dictionary with country names linked to their respective Wikipedia URL

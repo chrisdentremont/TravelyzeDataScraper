@@ -24,6 +24,7 @@ def getCountryData(country, url):
 
     countryData = {
         'Name': country,
+        'Description': "",
         'Flag': "",
         'Categories': {
             'Cuisine': {},
@@ -35,9 +36,46 @@ def getCountryData(country, url):
         },
     }
 
+    # Get country's description paragraph
+    descText = None
+    try:
+        descText = soup.find('table', attrs={'class':'infobox'}).findNextSibling()
+    except:
+        descText = None
+    
+
+    # Call OpenAI API, wait 30 seconds and try again if requests per minute limit has been reached
+    if descText != None:
+        prompt_complete = False
+        while not prompt_complete:
+            try:
+                completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages = [
+                {"role": "user", "content" : "Make a short summary of this text: " + descText.text}
+                ])
+                result = completion.choices[0].message.content
+                if(result.startswith("This text")):
+                    prompt_complete = False
+                else:
+                    countryData['Description'] = result
+                    prompt_complete = True
+            except:
+                time.sleep(30)
+    else:
+        countryData['Description'] = ""
+
+
     # Get country's flag image link
-    for t in soup.select('img[alt*="Flag of"]'):
-        countryData['Flag'] = t['src']
+    try:
+        flagLink = "https://en.wikipedia.org/" + soup.select('a[title*="Flag of"]')[0]['href']
+        flagPage = requests.get(flagLink)
+        flagSoup = BeautifulSoup(flagPage.content, "html.parser")
+
+        flagDiv = flagSoup.select('div[class=fullImageLink]')[0]
+        flagSvg = flagDiv.find('a')['href']
+        countryData['Flag'] = "https:" + flagSvg
+
+    except:
+        countryData['Flag'] = ""
 
 
     # Check if a specific category exists, and pull the data if it does
